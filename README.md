@@ -13,9 +13,9 @@ Snyk を使用した開発者向けの Infrastructure as Codeによるセキュ�
   - [Step 2 - GitHub Integrationの設定](#step-2---github-integrationの設定)
   - [Step 3 脆弱性を発見するプロジェクトの追加](#step-3-脆弱性を発見するプロジェクトの追加)
   - [Step 4 - Snyk CLIでスキャンをしてみる](#step-4---snyk-cliでスキャンをしてみる)
-  - [Step 5 Test using the Snyk CLI - AWS CloudFormation files](#step-5-test-using-the-snyk-cli---aws-cloudformation-files)
-  - [Step 6 Test using the Snyk CLI - Kubernetes YAML files](#step-6-test-using-the-snyk-cli---kubernetes-yaml-files)
-  - [Step 7 View Snyk IaC Rules](#step-7-view-snyk-iac-rules)
+  - [Step 5 - Snyk CLIでAWS CloudFormationをスキャンしてみる](#step-5---snyk-cliでaws-cloudformationをスキャンしてみる)
+  - [Step 6 - Snyk CLIでKubernetesのマニフェストファイルをスキャンしてみる](#step-6---snyk-cliでkubernetesのマニフェストファイルをスキャンしてみる)
+  - [Step 7 - Snyk IaCの検知するルールを確認してみよう](#step-7---snyk-iacの検知するルールを確認してみよう)
 
 ## 事前準備 
 
@@ -26,7 +26,7 @@ Snyk を使用した開発者向けの Infrastructure as Codeによるセキュ�
 
 # Workshop Steps
 
-_注: この手順はMacを想定していますが、WindowsやLinuxでもスクリプトを一部修正することで対応できます。_
+_**注: この手順はMacを想定していますが、WindowsやLinuxでもスクリプトを一部修正することで対応できます。**_
 
 ## Step 1 - GitHub IaCリポジトリのFork
 
@@ -60,7 +60,7 @@ GitHubとの連携ができたので、次はGitHubレポジトリをSnykのプ�
 
 ![alt tag](https://i.ibb.co/pWJW1VK/snyk-iac-1.png)
 
-__注: インポートとスキャンが成功すると以下のような画面が表示されます。_
+インポートとスキャンが成功すると以下のような画面が表示されます。
 
 ![alt tag](https://i.ibb.co/YNC5rfd/snyk-iac-2.png)
 
@@ -85,7 +85,7 @@ __注: インポートとスキャンが成功すると以下のような画面�
 SnykのGitHub連携に加えて、手元のコードベースに対してスキャンを行うCLIもあります。
 このステップではCLIを使ってスキャンを行なってみます。
 
-_注: インストールしたSnyk CLIのバージョンが以下のバージョンと同じかそれ以上か確認してください。Snyk CLIのインストールおよびアップグレードはこちらになります。https://docs.snyk.io/snyk-cli/install-the-snyk-cli_
+_**注: インストールしたSnyk CLIのバージョンが以下のバージョンと同じかそれ以上か確認してください。Snyk CLIのインストールおよびアップグレードはこちらになります。https://docs.snyk.io/snyk-cli/install-the-snyk-cli**_
 
 ```bash
 $ snyk --version
@@ -112,7 +112,7 @@ Your account has been authenticated. Snyk is now ready to be used.
 
 * Forkしたレポジトリをローカル環境へCloneしてください。
 
-_注： このレポジトリではなく、皆様がForkしたGitレポジトリをCloneしてください。_
+_**注： このレポジトリではなく、皆様がForkしたGitレポジトリをCloneしてください。**_
 
 ```bash
 $ git clone https://github.com/snyk-japan/snyk-iac-workshop
@@ -588,268 +588,529 @@ Terraform planは実際のプロビジョニングをする前に立てる実行
 より詳細についてはこちらを参照ください。
 [Test your Terraform files with our CLI tool](https://docs.snyk.io/products/snyk-infrastructure-as-code/snyk-cli-for-infrastructure-as-code/test-your-terraform-files-with-the-cli-tool)
 
-_注：　Planを行うには実際のクラウドクレデンシャルなどが必要なため、このワークショップでは割愛しています。_
+_**注：　Planを行うには実際のクラウドクレデンシャルなどが必要なため、このワークショップでは割愛しています。**_
 
-## Step 5 Test using the Snyk CLI - AWS CloudFormation files
+## Step 5 - Snyk CLIでAWS CloudFormationをスキャンしてみる
 
-_Note: Please ensure you have the latest version of the Snyk CLI installed a version equal to or greater than the version below. https://docs.snyk.io/features/snyk-cli/install-the-snyk-cli_
+Snyk IaCは、ソースコードレポジトリからCloudFormationファイルもスキャンすることができます。クラウド環境の安全性を高めるために、CloudFormationの設定ミスを本番環境に反映させる前に検出し、その修正方法についてアドバイスします。
 
-```bash
-$ snyk --version
-1.675.0
-```
-
-Snyk tests and monitors CloudFormation files from source code repositories. It gives advice on how to better secure cloud environments by catching misconfigurations before they are pushed to production along with assistance on how best to fix them
-
-* Run the following IaC scan of any files inside the folder "**CloudFormation**". This will pick up all the IaC config files which exist in this directory in our case we have two files
+* Snyk IaCは、"**CloudFormation**"ディレクトリ内のすべてのCloudFormationファイル（*.yml | *.yaml | *.json) をピックアップしスキャンします。
 
 ```bash
 $ snyk iac test ./CloudFormation/
 
-Testing fargate-service.yml...
+Snyk Infrastructure as Code
 
+✔ Test completed.
 
-Infrastructure as code issues:
-  ✗ S3 block public policy control is disabled [High Severity] [SNYK-CC-TF-96] in S3
-    introduced by Resources[CodePipelineArtifactBucket] > Properties > PublicAccessBlockConfiguration > BlockPublicPolicy
+Issues
 
-  ✗ S3 ignore public ACLs control is disabled [High Severity] [SNYK-CC-TF-97] in S3
-    introduced by Resources[CodePipelineArtifactBucket] > Properties > PublicAccessBlockConfiguration > IgnorePublicAcls
+Low Severity Issues: 15
 
-  ✗ S3 block public ACLs control is disabled [High Severity] [SNYK-CC-TF-95] in S3
-    introduced by Resources[CodePipelineArtifactBucket] > Properties > PublicAccessBlockConfiguration > BlockPublicAcls
+  [Low] CloudWatch log group not encrypted with managed key
+  Info:    Log group is not encrypted with customer managed key. Scope of use of
+           the key cannot be controlled via KMS/IAM policies
+  Rule:    https://snyk.io/security-rules/SNYK-CC-AWS-415
+  Path:    [DocId: 0] > Resources[LogGroup] > Properties > KmsKeyId
+  File:    fargate-service.yml
+  Resolve: Set `Properties.KmsKeyId` attribute with customer managed key id
 
-  ✗ S3 restrict public bucket control is disabled [High Severity] [SNYK-CC-TF-98] in S3
-    introduced by Resources[CodePipelineArtifactBucket] > Properties > PublicAccessBlockConfiguration > RestrictPublicBuckets
+  [Low] ECR repository is not encrypted with customer managed key
+  Info:    ECR repository is not encrypted with customer managed key. Scope of
+           use of the key cannot be controlled via KMS/IAM policies
+  Rule:    https://snyk.io/security-rules/SNYK-CC-AWS-418
+  Path:    [DocId: 0] > Resources[EcrDockerRepository] > Properties >
+           EncryptionConfiguration > KmsKey
+  File:    fargate-service.yml
+  Resolve: Set `Properties.EncryptionConfiguration.KmsKey` attribute to customer
+           managed KMS key
 
-  ✗ ECR image scanning is disabled [Low Severity] [SNYK-CC-TF-61] in ECR
-    introduced by Resources[EcrDockerRepository] > Properties > ImageScanningConfiguration
+  [Low] S3 bucket versioning disabled
+  Info:    S3 bucket versioning is disabled. Changes or deletion of objects will
+           not be reversible
+  Rule:    https://snyk.io/security-rules/SNYK-CC-TF-124
+  Path:    [DocId: 0] > Resources[CodePipelineArtifactBucket] > Properties >
+           VersioningConfiguration > Status
+  File:    fargate-service.yml
+  Resolve: Set `Properties.VersioningConfiguration.Status` attribute to
+           `Enabled`
 
-  ✗ S3 bucket versioning disabled [Low Severity] [SNYK-CC-TF-124] in S3
-    introduced by Resources[CodePipelineArtifactBucket] > Properties > VersioningConfiguration > Status
+  [Low] ECR Registry allows mutable tags
+  Info:    The AWS ECR registry does not enforce immutable tags. Image tags can
+           be modified post deployment
+  Rule:    https://snyk.io/security-rules/SNYK-CC-TF-126
+  Path:    [DocId: 0] > Resources[EcrDockerRepository] > Properties >
+           ImageTagMutability
+  File:    fargate-service.yml
+  Resolve: Set `Properties.ImageTagMutability` attribute to `IMMUTABLE`
 
-  ✗ CloudWatch log group not encrypted with managed key [Low Severity] [SNYK-CC-AWS-415] in CloudWatch
-    introduced by Resources[LogGroup] > Properties > KmsKeyId
+  [Low] ECR image scanning is disabled
+  Info:    The ECR image scan for known vulnerabilities is disabled. The known
+           vulnerabilities will not be automatically discovered
+  Rule:    https://snyk.io/security-rules/SNYK-CC-TF-61
+  Path:    [DocId: 0] > Resources[EcrDockerRepository] > Properties >
+           ImageScanningConfiguration
+  File:    fargate-service.yml
+  Resolve: Set `Properties.ImageScanningConfiguration` attribute to `true`
 
-  ✗ ECR repository is not encrypted with customer managed key [Low Severity] [SNYK-CC-AWS-418] in ECR
-    introduced by Resources[EcrDockerRepository] > Properties > EncryptionConfiguration > KmsKey
+  [Low] Rule allows open egress
+  Info:    The security group rule allows open egress. Open egress can be used
+           to exfiltrate data to unauthorized destinations, and enable access to
+           potentially malicious resources
+  Rule:    https://snyk.io/security-rules/SNYK-CC-TF-72
+  Path:    Resources[DbSecurityGroup] > Properties > SecurityGroupEgress[1]
+  File:    vpc.json
+  Resolve: Set `Properties.SecurityGroupEgress.CidrIp` attribute to specific
+           ranges e.g. `192.168.1.0/24`
 
-  ✗ ECR Registry allows mutable tags [Low Severity] [SNYK-CC-TF-126] in ECR
-    introduced by Resources[EcrDockerRepository] > Properties > ImageTagMutability
+  [Low] Rule allows open egress
+  Info:    The security group rule allows open egress. Open egress can be used
+           to exfiltrate data to unauthorized destinations, and enable access to
+           potentially malicious resources
+  Rule:    https://snyk.io/security-rules/SNYK-CC-TF-72
+  Path:    Resources[BastionSecurityGroup] > Properties > SecurityGroupEgress[1]
+  File:    vpc.json
+  Resolve: Set `Properties.SecurityGroupEgress.CidrIp` attribute to specific
+           ranges e.g. `192.168.1.0/24`
 
+  [Low] Rule allows open egress
+  Info:    The security group rule allows open egress. Open egress can be used
+           to exfiltrate data to unauthorized destinations, and enable access to
+           potentially malicious resources
+  Rule:    https://snyk.io/security-rules/SNYK-CC-TF-72
+  Path:    Resources[BastionSecurityGroup] > Properties > SecurityGroupEgress[2]
+  File:    vpc.json
+  Resolve: Set `Properties.SecurityGroupEgress.CidrIp` attribute to specific
+           ranges e.g. `192.168.1.0/24`
 
-Organization:      pas.apicella-41p
-Type:              CloudFormation
-Target file:       fargate-service.yml
-Project name:      CloudFormation
-Open source:       no
-Project path:      ./CloudFormation/
+  [Low] Rule allows open egress
+  Info:    The security group rule allows open egress. Open egress can be used
+           to exfiltrate data to unauthorized destinations, and enable access to
+           potentially malicious resources
+  Rule:    https://snyk.io/security-rules/SNYK-CC-TF-72
+  Path:    Resources[DbSecurityGroup] > Properties > SecurityGroupEgress[0]
+  File:    vpc.json
+  Resolve: Set `Properties.SecurityGroupEgress.CidrIp` attribute to specific
+           ranges e.g. `192.168.1.0/24`
 
-Tested fargate-service.yml for known issues, found 9 issues
+  [Low] Rule allows open egress
+  Info:    The security group rule allows open egress. Open egress can be used
+           to exfiltrate data to unauthorized destinations, and enable access to
+           potentially malicious resources
+  Rule:    https://snyk.io/security-rules/SNYK-CC-TF-72
+  Path:    Resources[BastionSecurityGroup] > Properties > SecurityGroupEgress[0]
+  File:    vpc.json
+  Resolve: Set `Properties.SecurityGroupEgress.CidrIp` attribute to specific
+           ranges e.g. `192.168.1.0/24`
+
+  [Low] AWS Security Group allows open egress
+  Info:    The inline security group rule allows open egress. Open egress can be
+           used to exfiltrate data to unauthorized destinations, and enable
+           access to potentially malicious resources
+  Rule:    https://snyk.io/security-rules/SNYK-CC-TF-73
+  Path:    Resources[BastionSecurityGroup] > Properties > SecurityGroupEgress[2]
+           > CidrIp
+  File:    vpc.json
+  Resolve: Set `Properties.SecurityGroupEgress.CidrIp` attribute to specific
+           ranges e.g. `192.168.1.0/24`
+
+  [Low] AWS Security Group allows open egress
+  Info:    The inline security group rule allows open egress. Open egress can be
+           used to exfiltrate data to unauthorized destinations, and enable
+           access to potentially malicious resources
+  Rule:    https://snyk.io/security-rules/SNYK-CC-TF-73
+  Path:    Resources[DbSecurityGroup] > Properties > SecurityGroupEgress[1] >
+           CidrIp
+  File:    vpc.json
+  Resolve: Set `Properties.SecurityGroupEgress.CidrIp` attribute to specific
+           ranges e.g. `192.168.1.0/24`
+
+  [Low] AWS Security Group allows open egress
+  Info:    The inline security group rule allows open egress. Open egress can be
+           used to exfiltrate data to unauthorized destinations, and enable
+           access to potentially malicious resources
+  Rule:    https://snyk.io/security-rules/SNYK-CC-TF-73
+  Path:    Resources[BastionSecurityGroup] > Properties > SecurityGroupEgress[0]
+           > CidrIp
+  File:    vpc.json
+  Resolve: Set `Properties.SecurityGroupEgress.CidrIp` attribute to specific
+           ranges e.g. `192.168.1.0/24`
+
+  [Low] AWS Security Group allows open egress
+  Info:    The inline security group rule allows open egress. Open egress can be
+           used to exfiltrate data to unauthorized destinations, and enable
+           access to potentially malicious resources
+  Rule:    https://snyk.io/security-rules/SNYK-CC-TF-73
+  Path:    Resources[DbSecurityGroup] > Properties > SecurityGroupEgress[0] >
+           CidrIp
+  File:    vpc.json
+  Resolve: Set `Properties.SecurityGroupEgress.CidrIp` attribute to specific
+           ranges e.g. `192.168.1.0/24`
+
+  [Low] AWS Security Group allows open egress
+  Info:    The inline security group rule allows open egress. Open egress can be
+           used to exfiltrate data to unauthorized destinations, and enable
+           access to potentially malicious resources
+  Rule:    https://snyk.io/security-rules/SNYK-CC-TF-73
+  Path:    Resources[BastionSecurityGroup] > Properties > SecurityGroupEgress[1]
+           > CidrIp
+  File:    vpc.json
+  Resolve: Set `Properties.SecurityGroupEgress.CidrIp` attribute to specific
+           ranges e.g. `192.168.1.0/24`
+
+Medium Severity Issues: 1
+
+  [Medium] Security Group allows open ingress
+  Info:    That inbound traffic is allowed to a resource from any source instead
+           of a restricted range. That potentially everyone can access your
+           resource
+  Rule:    https://snyk.io/security-rules/SNYK-CC-TF-1
+  Path:    Resources > ELBSecurityGroup > Properties > SecurityGroupIngress[0]
+  File:    vpc.json
+  Resolve: Set `Properties.SecurityGroupIngress.CidrIp` attribute with a more
+           restrictive IP, for example `192.16.0.0/24`
+
+High Severity Issues: 4
+
+  [High] S3 block public ACLs control is disabled
+  Info:    Bucket does not prevent creation of public ACLs. Anyone who can
+           manage bucket's ACLs will be able to grant public access to the
+           bucket
+  Rule:    https://snyk.io/security-rules/SNYK-CC-TF-95
+  Path:    [DocId: 0] > Resources[CodePipelineArtifactBucket] > Properties >
+           PublicAccessBlockConfiguration > BlockPublicAcls
+  File:    fargate-service.yml
+  Resolve: Set `Properties.PublicAccessBlockConfiguration.BlockPublicAcls`
+           attribute to `true`
+
+  [High] S3 block public policy control is disabled
+  Info:    Bucket does not prevent creation of public policies. Anyone who can
+           manage bucket's policies will be able to grant public access to the
+           bucket.
+  Rule:    https://snyk.io/security-rules/SNYK-CC-TF-96
+  Path:    [DocId: 0] > Resources[CodePipelineArtifactBucket] > Properties >
+           PublicAccessBlockConfiguration > BlockPublicPolicy
+  File:    fargate-service.yml
+  Resolve: Set `Properties.PublicAccessBlockConfiguration.BlockPublicPolicy`
+           attribute to `true`
+
+  [High] S3 ignore public ACLs control is disabled
+  Info:    Bucket will recognize public ACLs and allow public access. If public
+           ACL is attached to the bucket, anyone will be able to read and/or
+           write to the bucket.
+  Rule:    https://snyk.io/security-rules/SNYK-CC-TF-97
+  Path:    [DocId: 0] > Resources[CodePipelineArtifactBucket] > Properties >
+           PublicAccessBlockConfiguration > IgnorePublicAcls
+  File:    fargate-service.yml
+  Resolve: Set `Properties.PublicAccessBlockConfiguration.IgnorePublicAcls`
+           attribute to `true`
+
+  [High] S3 restrict public bucket control is disabled
+  Info:    Bucket will recognize public policies and allow public access. If
+           public policy is attached to the bucket, anyone will be able to read
+           and/or write to the bucket.
+  Rule:    https://snyk.io/security-rules/SNYK-CC-TF-98
+  Path:    [DocId: 0] > Resources[CodePipelineArtifactBucket] > Properties >
+           PublicAccessBlockConfiguration > RestrictPublicBuckets
+  File:    fargate-service.yml
+  Resolve: Set `Properties.PublicAccessBlockConfiguration.RestrictPublicBuckets`
+           attribute to `true`
 
 -------------------------------------------------------
 
-Testing vpc.json...
+Test Summary
 
+  Organization: masatomo.ito-qx0
+  Project name: snyk-japan/snyk-iac-workshop
 
-Infrastructure as code issues:
-  ✗ Security Group allows open ingress [Medium Severity] [SNYK-CC-TF-1] in VPC
-    introduced by Resources > ELBSecurityGroup > Properties > SecurityGroupIngress[0]
+✔ Files without issues: 0
+✗ Files with issues: 2
+  Ignored issues: 0
+  Total issues: 20 [ 0 critical, 4 high, 1 medium, 15 low ]
 
-  ✗ AWS Security Group allows open egress [Low Severity] [SNYK-CC-TF-73] in VPC
-    introduced by Resources[BastionSecurityGroup] > Properties > SecurityGroupEgress[1] > CidrIp
+-------------------------------------------------------
 
-  ✗ Rule allows open egress [Low Severity] [SNYK-CC-TF-72] in VPC
-    introduced by Resources[BastionSecurityGroup] > Properties > SecurityGroupEgress[1]
+Tip
 
-  ✗ AWS Security Group allows open egress [Low Severity] [SNYK-CC-TF-73] in VPC
-    introduced by Resources[BastionSecurityGroup] > Properties > SecurityGroupEgress[2] > CidrIp
-
-  ✗ Rule allows open egress [Low Severity] [SNYK-CC-TF-72] in VPC
-    introduced by Resources[BastionSecurityGroup] > Properties > SecurityGroupEgress[2]
-
-  ✗ AWS Security Group allows open egress [Low Severity] [SNYK-CC-TF-73] in VPC
-    introduced by Resources[DbSecurityGroup] > Properties > SecurityGroupEgress[1] > CidrIp
-
-  ✗ Rule allows open egress [Low Severity] [SNYK-CC-TF-72] in VPC
-    introduced by Resources[DbSecurityGroup] > Properties > SecurityGroupEgress[0]
-
-  ✗ AWS Security Group allows open egress [Low Severity] [SNYK-CC-TF-73] in VPC
-    introduced by Resources[BastionSecurityGroup] > Properties > SecurityGroupEgress[0] > CidrIp
-
-  ✗ Rule allows open egress [Low Severity] [SNYK-CC-TF-72] in VPC
-    introduced by Resources[BastionSecurityGroup] > Properties > SecurityGroupEgress[0]
-
-  ✗ Rule allows open egress [Low Severity] [SNYK-CC-TF-72] in VPC
-    introduced by Resources[DbSecurityGroup] > Properties > SecurityGroupEgress[1]
-
-  ✗ AWS Security Group allows open egress [Low Severity] [SNYK-CC-TF-73] in VPC
-    introduced by Resources[DbSecurityGroup] > Properties > SecurityGroupEgress[0] > CidrIp
-
-
-Organization:      pas.apicella-41p
-Type:              CloudFormation
-Target file:       vpc.json
-Project name:      CloudFormation
-Open source:       no
-Project path:      ./CloudFormation/
-
-Tested vpc.json for known issues, found 11 issues
-
-
-Tested 2 projects, 2 contained issues.
+  New: Share your test results in the Snyk Web UI with the option --report
 ```
 
-Go ahead and fix others if you have time and optionally commit your changes back to the GitHub repo if you like.
+時間があれば、ここで検出した設定ミスを修正して再度スキャンをかけてみてください。
 
-* To output the test format as JSON issue a command as follows. This provides more detailed information including links to issue references as well as the ability to upload the data into other system for reporting purposes.
+* Snyk Iacは解析結果をJsonフォーマットでも出力できます。より詳細な情報や、見つかった設定ミスの参照へのリンクなどを表示します。他のレポート生成ツールなどとの連携に便利です。
 
 ```bash
 $ snyk iac test ./CloudFormation --json
 ```
 
-For more information on AWS Cloud Formation scanning with Snyk see the following blog post
+CloudFormationのスキャンについてより詳細な説明は以下のリンクより参照ください。
 [Scan for AWS CloudFormation misconfigurations with Snyk IaC](https://snyk.io/blog/scan-aws-cloudformation-misconfigurations-snyk-iac/)
 
-## Step 6 Test using the Snyk CLI - Kubernetes YAML files
+## Step 6 - Snyk CLIでKubernetesのマニフェストファイルをスキャンしてみる
 
-Snyk tests and monitors Kubernetes configurations stored in your source code repositories and provides information, tips, and tricks to better secure a Kubernetes environment--catching misconfigurations before they are pushed to production as well as providing fixes for vulnerabilities
+Snyk IaCは、Kubernetesの設定ファイルもスキャンすることができます。Kubernetes環境のセキュリティを向上させるための情報やヒントなどを本番環境に適用される前に検出し、脆弱性に対する修正を提供します。
 
-Snyk Infrastructure as Code for Kubernetes supports:
+Snyk IaCは以下をスキャンできます。
 
 1. Deployments, Pods and Services.
 1. CronJobs, Jobs, StatefulSet, ReplicaSet, DaemonSet, and ReplicationController
 1. Helm Charts
 
-* Let's scan our Kubernetes YAML file which is just a basic K8s deployment as shown below
+* それではKubernetsのYamlファイルをスキャンしてみましょう。
 
 ```bash
-$ snyk iac test ./Kubernetes/employee-K8s.yaml
+$ snyk iac test ./Kubernetes/
 
-Testing employee-K8s.yaml...
+Snyk Infrastructure as Code
 
+✔ Test completed.
 
-Infrastructure as code issues:
-  ✗ Container is running without privilege escalation control [Medium Severity] [SNYK-CC-K8S-9] in Deployment
-    introduced by input > spec > template > spec > containers[snyk-employee-api] > securityContext > allowPrivilegeEscalation
+Issues
 
-  ✗ Container is running without root user control [Medium Severity] [SNYK-CC-K8S-10] in Deployment
-    introduced by input > spec > template > spec > containers[snyk-employee-api] > securityContext > runAsNonRoot
+Low Severity Issues: 4
 
-  ✗ Container does not drop all default capabilities [Medium Severity] [SNYK-CC-K8S-6] in Deployment
-    introduced by input > spec > template > spec > containers[snyk-employee-api] > securityContext > capabilities > drop
+  [Low] Container is running without memory limit
+  Info:    Memory limit is not defined. Containers without memory limits are
+           more likely to be terminated when the node runs out of memory
+  Rule:    https://snyk.io/security-rules/SNYK-CC-K8S-4
+  Path:    [DocId: 0] > input > spec > template > spec >
+           containers[snyk-employee-api] > resources > limits > memory
+  File:    employee-K8s.yaml
+  Resolve: Set `resources.limits.memory` value
 
-  ✗ Service does not restrict ingress sources [Medium Severity] [SNYK-CC-K8S-15] in Service
-    introduced by service > spec > loadBalancerSourceRanges
+  [Low] Container is running without liveness probe
+  Info:    Liveness probe is not defined. Kubernetes will not be able to detect
+           if application is able to service requests, and will not restart
+           unhealthy pods
+  Rule:    https://snyk.io/security-rules/SNYK-CC-K8S-41
+  Path:    [DocId: 0] > spec > template > spec > containers[snyk-employee-api] >
+           livenessProbe
+  File:    employee-K8s.yaml
+  Resolve: Add `livenessProbe` attribute
 
-  ✗ Container is running without liveness probe [Low Severity] [SNYK-CC-K8S-41] in Deployment
-    introduced by spec > template > spec > containers[snyk-employee-api] > livenessProbe
+  [Low] Container has no CPU limit
+  Info:    Container has no CPU limit. CPU limits can prevent containers from
+           consuming valuable compute time for no benefit (e.g. inefficient
+           code) that might lead to unnecessary costs. It is advisable to also
+           configure CPU requests to ensure application stability.
+  Rule:    https://snyk.io/security-rules/SNYK-CC-K8S-5
+  Path:    [DocId: 0] > input > spec > template > spec >
+           containers[snyk-employee-api] > resources > limits > cpu
+  File:    employee-K8s.yaml
+  Resolve: Add `resources.limits.cpu` field with required CPU limit value
 
-  ✗ Container is running with writable root filesystem [Low Severity] [SNYK-CC-K8S-8] in Deployment
-    introduced by input > spec > template > spec > containers[snyk-employee-api] > securityContext > readOnlyRootFilesystem
+  [Low] Container is running with writable root filesystem
+  Info:    `readOnlyRootFilesystem` attribute is not set to `true`. Compromised
+           process could abuse writable root filesystem to elevate privileges
+  Rule:    https://snyk.io/security-rules/SNYK-CC-K8S-8
+  Path:    [DocId: 0] > input > spec > template > spec >
+           containers[snyk-employee-api] > securityContext >
+           readOnlyRootFilesystem
+  File:    employee-K8s.yaml
+  Resolve: Set `securityContext.readOnlyRootFilesystem` to `true`
 
-  ✗ Container is running without AppArmor profile [Low Severity] [SNYK-CC-K8S-32] in Deployment
-    introduced by metadata > annotations['container.apparmor.security.beta.kubernetes.io/snyk-employee-api']
+Medium Severity Issues: 4
 
-  ✗ Container is running without memory limit [Low Severity] [SNYK-CC-K8S-4] in Deployment
-    introduced by input > spec > template > spec > containers[snyk-employee-api] > resources > limits > memory
+  [Medium] Container is running without root user control
+  Info:    Container is running without root user control. Container could be
+           running with full administrative privileges
+  Rule:    https://snyk.io/security-rules/SNYK-CC-K8S-10
+  Path:    [DocId: 0] > input > spec > template > spec >
+           containers[snyk-employee-api] > securityContext > runAsNonRoot
+  File:    employee-K8s.yaml
+  Resolve: Set `securityContext.runAsNonRoot` to `true`
 
-  ✗ Container is running without cpu limit [Low Severity] [SNYK-CC-K8S-5] in Deployment
-    introduced by input > spec > template > spec > containers[snyk-employee-api] > resources > limits > cpu
+  [Medium] Service does not restrict ingress sources
+  Info:    Defining a Load balancer Service without setting the
+           loadBalancerSourceRanges property will use the default value of
+           0.0.0.0/0. This allows access to any traffic to the Node Security
+           Group(s), potentially meaning everyone can access your service.
+  Rule:    https://snyk.io/security-rules/SNYK-CC-K8S-15
+  Path:    [DocId: 1] > service > spec > loadBalancerSourceRanges
+  File:    employee-K8s.yaml
+  Resolve: Set `loadBalancerSourceRanges` attribute value to specific IP
+           addresses
 
+  [Medium] Container does not drop all default capabilities
+  Info:    All default capabilities are not explicitly dropped. Containers are
+           running with potentially unnecessary privileges
+  Rule:    https://snyk.io/security-rules/SNYK-CC-K8S-6
+  Path:    [DocId: 0] > input > spec > template > spec >
+           containers[snyk-employee-api] > securityContext > capabilities > drop
+  File:    employee-K8s.yaml
+  Resolve: Add `ALL` to `securityContext.capabilities.drop` list, and add only
+           required capabilities in `securityContext.capabilities.add`
 
-Organization:      pas.apicella-41p
-Type:              Kubernetes
-Target file:       ./Kubernetes/employee-K8s.yaml
-Project name:      Kubernetes
-Open source:       no
-Project path:      ./Kubernetes/employee-K8s.yaml
+  [Medium] Container is running without privilege escalation control
+  Info:    `allowPrivilegeEscalation` attribute is not set to `false`. Processes
+           could elevate current privileges via known vectors, for example SUID
+           binaries
+  Rule:    https://snyk.io/security-rules/SNYK-CC-K8S-9
+  Path:    [DocId: 0] > input > spec > template > spec >
+           containers[snyk-employee-api] > securityContext >
+           allowPrivilegeEscalation
+  File:    employee-K8s.yaml
+  Resolve: Set `securityContext.allowPrivilegeEscalation` to `false`
 
-Tested employee-K8s.yaml for known issues, found 9 issues
+-------------------------------------------------------
+
+Test Summary
+
+  Organization: masatomo.ito-qx0
+  Project name: snyk-japan/snyk-iac-workshop
+
+✔ Files without issues: 0
+✗ Files with issues: 1
+  Ignored issues: 0
+  Total issues: 8 [ 0 critical, 0 high, 4 medium, 4 low ]
+
+-------------------------------------------------------
+
+Tip
+
+  New: Share your test results in the Snyk Web UI with the option --report
 ```
 
-* Let's go ahead and fix the following
+* ここで一つの危険な設定を修正してみましょう。
 
 ```bash
-  ✗ Container is running without root user control [Medium Severity] [SNYK-CC-K8S-10] in Deployment
-    introduced by input > spec > template > spec > containers[snyk-employee-api] > securityContext > runAsNonRoot
+  [Medium] Container is running without root user control
+  Info:    Container is running without root user control. Container could be
+           running with full administrative privileges
+  Rule:    https://snyk.io/security-rules/SNYK-CC-K8S-10
+  Path:    [DocId: 0] > input > spec > template > spec >
+           containers[snyk-employee-api] > securityContext > runAsNonRoot
+  File:    employee-K8s.yaml
+  Resolve: Set `securityContext.runAsNonRoot` to `true`
 ```
 
-* Edit the file "**./Kubernetes/employee-K8s.yaml**" and add "**securityContext > runAsNonRoot**" as shown below.
+この設定では、コンテナがRoot権限で実行される可能性を示唆しています。
+"**./Kubernetes/employee-K8s.yaml**"の"**securityContext > runAsNonRoot**"を`true`に設定して修正してみましょう。
 
 ```yaml
     spec:
       securityContext:
         runAsNonRoot: true
-      containers:
-        - name: snyk-employee-api
-          image: pasapples/springbootemployee:jib
-          imagePullPolicy: Always
-          ports:
-            - containerPort: 8080
 ```
 
-* Run a scan of "**./Kubernetes/employee-K8s.yaml**" again to verify you have fixed that issue
+再度スキャンして修正が適用されたか確認してみます。
+
   
 ```bash
-$ snyk iac test ./Kubernetes/employee-K8s.yaml
+$ snyk iac test ./Kubernetes/
 
-Testing employee-K8s.yaml...
+Snyk Infrastructure as Code
 
+✔ Test completed.
 
-Infrastructure as code issues:
-  ✗ Container is running without privilege escalation control [Medium Severity] [SNYK-CC-K8S-9] in Deployment
-    introduced by input > spec > template > spec > containers[snyk-employee-api] > securityContext > allowPrivilegeEscalation
+Issues
 
-  ✗ Container does not drop all default capabilities [Medium Severity] [SNYK-CC-K8S-6] in Deployment
-    introduced by input > spec > template > spec > containers[snyk-employee-api] > securityContext > capabilities > drop
+Low Severity Issues: 4
 
-  ✗ Service does not restrict ingress sources [Medium Severity] [SNYK-CC-K8S-15] in Service
-    introduced by service > spec > loadBalancerSourceRanges
+  [Low] Container is running without memory limit
+  Info:    Memory limit is not defined. Containers without memory limits are
+           more likely to be terminated when the node runs out of memory
+  Rule:    https://snyk.io/security-rules/SNYK-CC-K8S-4
+  Path:    [DocId: 0] > input > spec > template > spec >
+           containers[snyk-employee-api] > resources > limits > memory
+  File:    employee-K8s.yaml
+  Resolve: Set `resources.limits.memory` value
 
-  ✗ Container is running without liveness probe [Low Severity] [SNYK-CC-K8S-41] in Deployment
-    introduced by spec > template > spec > containers[snyk-employee-api] > livenessProbe
+  [Low] Container is running without liveness probe
+  Info:    Liveness probe is not defined. Kubernetes will not be able to detect
+           if application is able to service requests, and will not restart
+           unhealthy pods
+  Rule:    https://snyk.io/security-rules/SNYK-CC-K8S-41
+  Path:    [DocId: 0] > spec > template > spec > containers[snyk-employee-api] >
+           livenessProbe
+  File:    employee-K8s.yaml
+  Resolve: Add `livenessProbe` attribute
 
-  ✗ Container is running with writable root filesystem [Low Severity] [SNYK-CC-K8S-8] in Deployment
-    introduced by input > spec > template > spec > containers[snyk-employee-api] > securityContext > readOnlyRootFilesystem
+  [Low] Container has no CPU limit
+  Info:    Container has no CPU limit. CPU limits can prevent containers from
+           consuming valuable compute time for no benefit (e.g. inefficient
+           code) that might lead to unnecessary costs. It is advisable to also
+           configure CPU requests to ensure application stability.
+  Rule:    https://snyk.io/security-rules/SNYK-CC-K8S-5
+  Path:    [DocId: 0] > input > spec > template > spec >
+           containers[snyk-employee-api] > resources > limits > cpu
+  File:    employee-K8s.yaml
+  Resolve: Add `resources.limits.cpu` field with required CPU limit value
 
-  ✗ Container is running without AppArmor profile [Low Severity] [SNYK-CC-K8S-32] in Deployment
-    introduced by metadata > annotations['container.apparmor.security.beta.kubernetes.io/snyk-employee-api']
+  [Low] Container is running with writable root filesystem
+  Info:    `readOnlyRootFilesystem` attribute is not set to `true`. Compromised
+           process could abuse writable root filesystem to elevate privileges
+  Rule:    https://snyk.io/security-rules/SNYK-CC-K8S-8
+  Path:    [DocId: 0] > input > spec > template > spec >
+           containers[snyk-employee-api] > securityContext >
+           readOnlyRootFilesystem
+  File:    employee-K8s.yaml
+  Resolve: Set `securityContext.readOnlyRootFilesystem` to `true`
 
-  ✗ Container is running without memory limit [Low Severity] [SNYK-CC-K8S-4] in Deployment
-    introduced by input > spec > template > spec > containers[snyk-employee-api] > resources > limits > memory
+Medium Severity Issues: 3
 
-  ✗ Container is running without cpu limit [Low Severity] [SNYK-CC-K8S-5] in Deployment
-    introduced by input > spec > template > spec > containers[snyk-employee-api] > resources > limits > cpu
+  [Medium] Service does not restrict ingress sources
+  Info:    Defining a Load balancer Service without setting the
+           loadBalancerSourceRanges property will use the default value of
+           0.0.0.0/0. This allows access to any traffic to the Node Security
+           Group(s), potentially meaning everyone can access your service.
+  Rule:    https://snyk.io/security-rules/SNYK-CC-K8S-15
+  Path:    [DocId: 1] > service > spec > loadBalancerSourceRanges
+  File:    employee-K8s.yaml
+  Resolve: Set `loadBalancerSourceRanges` attribute value to specific IP
+           addresses
 
+  [Medium] Container does not drop all default capabilities
+  Info:    All default capabilities are not explicitly dropped. Containers are
+           running with potentially unnecessary privileges
+  Rule:    https://snyk.io/security-rules/SNYK-CC-K8S-6
+  Path:    [DocId: 0] > input > spec > template > spec >
+           containers[snyk-employee-api] > securityContext > capabilities > drop
+  File:    employee-K8s.yaml
+  Resolve: Add `ALL` to `securityContext.capabilities.drop` list, and add only
+           required capabilities in `securityContext.capabilities.add`
 
-Organization:      pas.apicella-41p
-Type:              Kubernetes
-Target file:       ./Kubernetes/employee-K8s.yaml
-Project name:      Kubernetes
-Open source:       no
-Project path:      ./Kubernetes/employee-K8s.yaml
+  [Medium] Container is running without privilege escalation control
+  Info:    `allowPrivilegeEscalation` attribute is not set to `false`. Processes
+           could elevate current privileges via known vectors, for example SUID
+           binaries
+  Rule:    https://snyk.io/security-rules/SNYK-CC-K8S-9
+  Path:    [DocId: 0] > input > spec > template > spec >
+           containers[snyk-employee-api] > securityContext >
+           allowPrivilegeEscalation
+  File:    employee-K8s.yaml
+  Resolve: Set `securityContext.allowPrivilegeEscalation` to `false`
 
-Tested employee-K8s.yaml for known issues, found 8 issues
+-------------------------------------------------------
+
+Test Summary
+
+  Organization: masatomo.ito-qx0
+  Project name: snyk-japan/snyk-iac-workshop
+
+✔ Files without issues: 0
+✗ Files with issues: 1
+  Ignored issues: 0
+  Total issues: 7 [ 0 critical, 0 high, 3 medium, 4 low ]
+
+-------------------------------------------------------
+
+Tip
+
+  New: Share your test results in the Snyk Web UI with the option --report
 ```
 
-Go ahead and fix others if you have time and optionally commit your changes back to the GitHub repo if you like.
 
-* To output the test format as JSON issue a command as follows. This provides more detailed information including links to issue references as well as the ability to upload the data into other system for reporting purposes.
+## Step 7 - Snyk IaCの検知するルールを確認してみよう
 
-```bash
-$ snyk iac test ./Kubernetes/employee-K8s.yaml --json
-```
+Snyk IaCは、Terraform、CloudFormation、Kubernetes、HelmのIaCを解析することができます。また、AWS、Azure、GCP、Kubernetesにわたる包括的なセキュリティルールのセットを適用します。各プロバイダーのベストプラクティスやCISなどのベンチマークなどを揃えています。
 
-## Step 7 View Snyk IaC Rules
+こちらのリンクより、それらのルールセットを確認ください。
+[Snyk Infrastructure as Code](https://snyk.io/security-rules)
 
-Snyk IaC has a comprehensive set of security rules across AWS, Azure, GCP & Kubernetes with support for Terraform, CloudFormation, Kubernetes, and Helm configuration formats. The details of these issues, their impact, and how to fix them are all built-in to Snyk IaC, so developers get feedback directly in their own tools. For reference, we have also documented the security rules that we support for each provider below, along with relevant benchmarks and authoritative third-party references
-
-Navigate to [Snyk Infrastructure as Code](https://snyk.io/security-rules)
-
-Thanks for attending and completing this workshop
+以上でSnyk IaCのワークショップは終わりになります。
+ありがとうございました。
 
 ![alt tag](https://i.ibb.co/7tnp1B6/snyk-logo.png)
 
 <hr />
-Pas Apicella [pas at snyk.io] is an Solution Engineer at Snyk APJ

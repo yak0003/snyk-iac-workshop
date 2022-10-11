@@ -14,7 +14,7 @@ spec:
         app: snyk-employee-api
     spec:
       securityContext:
-        runAsNonRoot: true
+        runAsNonRoot: false
       containers:
         - name: snyk-employee-api
           image: pasapples/springbootemployee:jib
