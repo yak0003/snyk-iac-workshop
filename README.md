@@ -44,13 +44,13 @@ _**注: この手順はMacを想定していますが、WindowsやLinuxでもス
 * Integrations → Source Control → GitHubに進んでください。
 * GitHub Integrationに必要なGitHubのクレデンシャルを入力してください。
 
-![alt tag](https://i.ibb.co/bPqqybM/snyk-starter-open-source-1.png)
+<img width="1246" alt="github_integration" src="https://user-images.githubusercontent.com/45160975/207768680-195af3ef-0c65-4773-867e-3d1b6648ac3b.png">
 
 ## Step 3 脆弱性を発見するプロジェクトの追加
 
 * このステップを行う前にIaCスキャンが有効になっているか確認ください。"**Settings → Infrastructure as code**"から確認および有効化ができます。
 
-![alt tag](https://i.ibb.co/bRLppWW/snyk-iac-7.png)
+<img width="1885" alt="iac_setting" src="https://user-images.githubusercontent.com/45160975/207768857-863cdccf-ecd2-45e3-a0ae-6f94b44ae098.png">
 
 GitHubとの連携ができたので、次はGitHubレポジトリをSnykのプロジェクトとしてインポートします。
 
